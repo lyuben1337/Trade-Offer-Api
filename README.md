@@ -4,11 +4,14 @@
 Check it here https://www.oracle.com/java/technologies/downloads/#java17
 or here https://adoptium.net/temurin/releases/ 
 
+- Gradle should be installed in the system
+https://gradle.org/install/
+
 ## How to Build:
-To build the application execute the following commands in the project folder (where pom.xml and mvnw are located): 
+To build the application execute the following commands in the project folder (where build.gradle are located): 
 
 ```bash
-./mvnw clean package # this will build the project
+gradle build # this will build the project
 ```
 For the first time it will download and install Maven version configured in the project settings (`v.3.8.6`)
 Next time the cached version will be used without redownloading.
@@ -16,9 +19,8 @@ Next time the cached version will be used without redownloading.
 After the build is completed, the folder `/target` will be created with a compiled `.jar` ready to be launched.
 
 ## How to Run:
-Now you can launch the server for example at port `8085`
-(if the option `--server.port=8085` is not provided the default port is `8080`):
+Now you can launch the server:
 ```bash
-java -jar ./target/*.jar --server.port=8085
+java -jar ./target/*.jar
 ```
 It may take up to around 15 sec for the server to start 
