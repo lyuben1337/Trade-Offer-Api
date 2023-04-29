@@ -24,6 +24,8 @@ public class Filter {
 
     private String name;
 
+    private String type;
+
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.DETACH, CascadeType.REFRESH},
             mappedBy = "filter")

@@ -8,6 +8,7 @@ import java.util.List;
 @Builder
 public record FilterDTO (
     String name,
+    String type,
     List<String> params
 ) {
 

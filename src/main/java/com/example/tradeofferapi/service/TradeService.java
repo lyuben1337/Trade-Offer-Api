@@ -4,6 +4,7 @@ import com.example.tradeofferapi.model.entity.App;
 import com.example.tradeofferapi.model.entity.Filter;
 import com.example.tradeofferapi.model.entity.FilterParam;
 import com.example.tradeofferapi.model.request.FilterParamsDTO;
+import com.example.tradeofferapi.model.request.FiltersDTO;
 import com.example.tradeofferapi.model.response.AppFilters;
 import com.example.tradeofferapi.model.response.FilterDTO;
 import com.example.tradeofferapi.repository.AppRepository;
@@ -42,6 +43,7 @@ public class TradeService {
     private FilterDTO toFilterDTO (Filter filter) {
         return FilterDTO.builder()
                 .name(filter.getName())
+                .type(filter.getType())
                 .params(filter.getParams()
                         .stream()
                         .map(FilterParam::getFilterValue)
@@ -63,23 +65,27 @@ public class TradeService {
         );
     }
 
-    public void addFilter(long appId, String filter) {
+    public void addFilters(long appId, FiltersDTO filtersDTO) {
         var app = appRepository.findById(appId).orElseThrow ( () ->
             new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "App with id " + appId + " doesn't exists")
         );
 
-        if(filterRepository.existsByApp_IdAndNameIgnoreCase(appId, filter)) {
+        filtersDTO.filters().stream()
+                .filter(filter -> filterRepository.existsByApp_IdAndNameIgnoreCase(appId, filter.name()))
+                .forEach(filter -> {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "App with id " + appId + " already has filter with name " + filter);
-        }
+        });
 
-        filterRepository.save (
+        filtersDTO.filters().forEach(filter -> filterRepository.save(
                 Filter.builder()
                         .app(app)
-                        .name(filter)
+                        .name(filter.name())
+                        .type(filter.type())
                         .build()
-        );
+        ));
+
     }
 
     public void addFilterParams(long appId, String filter, FilterParamsDTO params) {
@@ -94,18 +100,13 @@ public class TradeService {
         );
 
         log.warn("appId = {}, filterName = {}, filterParams = {}", appId, filter, params.filterParams().toString());
-        for (String param:
-                params.filterParams()) {
-            if(!filterParamRepository.existsByFilter_App_IdAndFilter_NameIgnoreCaseAndFilterValueIgnoreCase
-                    (appId, filter, param)) {
-                filterParamRepository.save(
-                        FilterParam.builder()
-                                .filter(appFilter)
-                                .filterValue(param)
-                                .build()
-                );
-            }
-        }
+        params.filterParams().stream().filter(param -> !filterParamRepository.existsByFilter_App_IdAndFilter_NameIgnoreCaseAndFilterValueIgnoreCase
+                (appId, filter, param)).forEach(param -> filterParamRepository.save(
+                FilterParam.builder()
+                        .filter(appFilter)
+                        .filterValue(param)
+                        .build()
+        ));
 
     }
 }

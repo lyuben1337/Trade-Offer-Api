@@ -1,13 +1,12 @@
 package com.example.tradeofferapi.controller;
 
 import com.example.tradeofferapi.model.request.FilterParamsDTO;
+import com.example.tradeofferapi.model.request.FiltersDTO;
 import com.example.tradeofferapi.model.response.AppFilters;
 import com.example.tradeofferapi.service.TradeService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -28,10 +27,10 @@ public class TradeController {
 
     @PostMapping("/api/v1/{app-id}/filters")
     @ResponseStatus(HttpStatus.CREATED)
-    void addFilter(@PathVariable(name = "app-id") long appId,
-                   @RequestParam(required = true) String filter
-    ) {
-        tradeService.addFilter(appId, filter);
+    void addFilters(@PathVariable(name = "app-id") long appId,
+                   @RequestBody(required = true) FiltersDTO filters
+                   ) {
+        tradeService.addFilters(appId, filters);
     }
 
     @PostMapping("/api/v1/{app-id}/filters/{filter-name}")
