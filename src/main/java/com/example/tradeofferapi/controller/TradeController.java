@@ -5,9 +5,13 @@ import com.example.tradeofferapi.model.request.FiltersDTO;
 import com.example.tradeofferapi.model.response.AppFilters;
 import com.example.tradeofferapi.service.TradeService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @AllArgsConstructor
 public class TradeController {
