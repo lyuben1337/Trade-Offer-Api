@@ -13,14 +13,12 @@ To build the application execute the following commands in the project folder (w
 ```bash
 gradle build # this will build the project
 ```
-For the first time it will download and install Maven version configured in the project settings (`v.3.8.6`)
-Next time the cached version will be used without redownloading.
 
-After the build is completed, the folder `/target` will be created with a compiled `.jar` ready to be launched.
+After the build is completed, the folder `/build/libs/` will be created with a compiled `.jar` ready to be launched.
 
 ## How to Run:
-Now you can launch the server:
+Now you can launch the server at port 8085 (if the option --server.port=8085 is not provided the default port is 8080) and with admin login and password for secured endpoints (if the options --trade-offer-api.login=mylogin and --trade-offer-api.password=mypassword are not provided the default login is admin and password is admin):
 ```bash
-java -jar ./target/*.jar
+java -jar build/libs/<file_name>.jar --server.port=8085 --trade-offer-api.login=mylogin --trade-offer-api.password=mypassword
 ```
 It may take up to around 15 sec for the server to start 
