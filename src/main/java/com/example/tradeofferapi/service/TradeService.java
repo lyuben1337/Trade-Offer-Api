@@ -6,7 +6,9 @@ import com.example.tradeofferapi.model.entity.FilterParam;
 import com.example.tradeofferapi.model.request.FilterParamsDTO;
 import com.example.tradeofferapi.model.request.FiltersDTO;
 import com.example.tradeofferapi.model.response.AppFilters;
-import com.example.tradeofferapi.model.response.FilterDTO;
+import com.example.tradeofferapi.model.response.AppsDTO;
+import com.example.tradeofferapi.model.response.FilterResponseDTO;
+import com.example.tradeofferapi.model.response.ParamDTO;
 import com.example.tradeofferapi.repository.AppRepository;
 import com.example.tradeofferapi.repository.FilterParamRepository;
 import com.example.tradeofferapi.repository.FilterRepository;
@@ -14,12 +16,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional
 @AllArgsConstructor
 public class TradeService {
 
@@ -29,7 +33,8 @@ public class TradeService {
 
     public AppFilters getAppFilters(long appId) {
         var app = appRepository.findById(appId).orElseThrow( () ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND)
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "App with ID " + appId + " not found")
         );
         var filters = app.getFilters()
                 .stream()
@@ -40,13 +45,14 @@ public class TradeService {
                 .build();
     }
 
-    private FilterDTO toFilterDTO (Filter filter) {
-        return FilterDTO.builder()
+    private FilterResponseDTO toFilterDTO (Filter filter) {
+        return FilterResponseDTO.builder()
+                .id(filter.getId())
                 .name(filter.getName())
                 .type(filter.getType())
                 .params(filter.getParams()
                         .stream()
-                        .map(FilterParam::getFilterValue)
+                        .map(param -> new ParamDTO(param.getId(), param.getFilterValue()))
                         .toList()
                 )
                 .build();
@@ -86,6 +92,7 @@ public class TradeService {
                         .build()
         ));
 
+        filtersDTO.filters().forEach(filterDTO -> addFilterParams(appId, filterDTO.name(), new FilterParamsDTO(filterDTO.params())));
     }
 
     public void addFilterParams(long appId, String filter, FilterParamsDTO params) {
@@ -99,7 +106,6 @@ public class TradeService {
                         "App with id " + appId + " has not filter with name " + filter)
         );
 
-        log.warn("appId = {}, filterName = {}, filterParams = {}", appId, filter, params.filterParams().toString());
         params.filterParams().stream().filter(param -> !filterParamRepository.existsByFilter_App_IdAndFilter_NameIgnoreCaseAndFilterValueIgnoreCase
                 (appId, filter, param)).forEach(param -> filterParamRepository.save(
                 FilterParam.builder()
@@ -108,5 +114,39 @@ public class TradeService {
                         .build()
         ));
 
+    }
+
+    public void deleteApp(long appId) {
+        var app = appRepository.findById(appId).orElseThrow ( () ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "App with id " + appId + " doesn't exists")
+        );
+        app.getFilters().forEach(filter -> {
+            filterParamRepository.deleteAll(filter.getParams());
+        });
+        filterRepository.deleteAll(app.getFilters());
+        appRepository.delete(app);
+    }
+
+    public void deleteFilter(long filterId) {
+        var filter = filterRepository.findById(filterId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Filter with id " + filterId + " doesn't exists")
+        );
+        filterParamRepository.deleteAll(filter.getParams());
+        log.error(filter.toString());
+        filterRepository.delete(filter);
+    }
+
+    public void deleteParam(long paramId) {
+        var param = filterParamRepository.findById(paramId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Param with id " + paramId + " doesn't exists")
+        );
+        filterParamRepository.delete(param);
+    }
+
+    public AppsDTO getApps() {
+        return new AppsDTO(appRepository.findAll().stream().mapToLong(App::getId).toArray());
     }
 }

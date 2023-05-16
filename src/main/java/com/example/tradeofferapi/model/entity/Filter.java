@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 public class Filter {
     @Id
@@ -29,5 +30,6 @@ public class Filter {
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.DETACH, CascadeType.REFRESH},
             mappedBy = "filter")
+    @ToString.Exclude
     private List<FilterParam> params;
 }
