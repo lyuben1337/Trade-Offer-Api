@@ -1,6 +1,6 @@
 # Trade Offer API
 
-This repository contains the Trade Offer API, which is developed using Java, Maven, and Spring Boot. The API allows users to save Steam apps filters and their parameters and use this data then use .
+This repository contains the Trade Offer API, which is developed using Java, Gradle, and Spring Boot. The API allows users to save Steam apps filters and their parameters and use this data then use .
 
 ## Table of Contents
 - [Links and Badges](#links-and-badges)
